@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.Graduation.Dao.PetDao.PetFosterDao">
+
+    <!--添加寄养信息-->
+    <insert id="AddPetFoster">
+insert into petfoster(id, feedername, pettype, petcage, fosterstartime, fosterendtime, fosterremark, feederphone,fosterprice) values(#{id}, #{feedername}, #{pettype}, #{petcage}, #{fosterstartime}, #{fosterendtime}, #{fosterremark}, #{feederphone},#{fosterprice})
+    </insert>
+    <!--修改-->
+    <update id="UpdatePetFoster">
+update petfoster set feedername=#{feedername},pettype=#{pettype},petcage=#{petcage},fosterendtime=#{fosterendtime},
+fosterremark=#{fosterremark},feederphone=#{feederphone},state=#{state},
+fosterstartime=#{fosterstartime},fosterprice=#{fosterprice} where
+ id=#{id}
+ </update>
+    <!--结束寄养-->
+    <update id="StopFoster">
+   update petfoster set state='1' where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="DeletePetFoster">
+        delete  from petfoster where id=#{id}
+    </delete>
+
+
+    <!--查询-->
+    <select id="FindAllInfo" resultType="com.example.demo.Graduation.entity.PetfosterEntity">
+        SELECT * FROM petfoster
+        <where>
+            <if test="feedername!='' and feedername!=null">
+                AND feedername LIKE concat('%',#{feedername},'%')
+            </if>
+            <if test="feederphone!='' and  feederphone!=null">
+                AND feederphone=#{feederphone}
+            </if>
+        </where>
+        ORDER BY state ASC
+    </select>
+    <!--根据ID查询信息-->
+    <select id="IdFindPetFosterinfo" resultType="com.example.demo.Graduation.entity.PetfosterEntity">
+        SELECT * FROM petfoster WHERE  id=#{id}
+    </select>
+    <!--查询正在寄养的宠物数量-->
+    <select id="FindUnfinishedPetFosterMumber" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM petfoster WHERE state=0
+    </select>
+</mapper>

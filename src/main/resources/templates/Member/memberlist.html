@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>会员管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/css/page.css}">
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+</head>
+<body class="layui-anim layui-anim-up">
+<div class="x-nav">
+    <a class="layui-btn layui-btn-primary layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:38px">ဂ</i></a>
+</div>
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" th:action="@{/member}">
+            <input type="text" name="name" placeholder="请输入会员名" autocomplete="off" class="layui-input"
+                   id="membername" th:value="${membername}">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+        </form>
+    </div>
+    <xblock>
+        <button class="layui-btn" onclick="addmember()" shiro:hasPermission="member:add"><i
+                class="layui-icon"></i>添加
+        </button>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th hidden>ID</th>
+            <th>会员名</th>
+            <th>会员手机</th>
+            <th>会员邮箱</th>
+            <th>会员VIP</th>
+            <th>余额</th>
+            <th>消费总额</th>
+            <th>积分</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="member : ${memberlist.list}">
+            <td th:text="${member.id}" hidden></td>
+            <td th:text="${member.name}"></td>
+            <td th:text="${member.phone}"></td>
+            <td th:text="${member.email}"></td>
+            <td th:text="${member.vip.name}"></td>
+            <td th:text="${member.balance}"></td>
+            <td th:text="${member.total_consumption}"></td>
+            <td th:text="${member.integral}"></td>
+            <td class="td-manage">
+                <a title="修改" th:onclick="updatemember([[${member.id}]])" shiro:hasPermission="member:update">
+                    <i class="layui-icon">&#xe642;</i>
+                </a>
+                <a title="删除" th:onclick="deletemember([[${member.id}]])"
+                   shiro:hasPermission="member:delete">
+                    <i class="layui-icon">&#xe640;</i>
+                </a>
+                <a title="充值" th:onclick="recharge([[${member.id}]])"
+                   shiro:hasPermission="member:recharge">
+                    <i class="layui-icon">&#xe65e;</i>
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(memberlist.list)}">
+            <td colspan="9" style="color: red;font-size: 32px;">暂无数据</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="page">
+        <div id="page" class="page_div"></div>
+    </div>
+</div>
+<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+<script th:src="@{/js/pageMe.js}"></script>
+<script th:inline="javascript">
+    var memberlist = [[${memberlist}]];
+    var membername = $('#membername').val().toString().trim();
+    //翻页
+    $("#page").paging({
+        pageNum: memberlist.pageNum, // 当前页面
+        totalNum: memberlist.pages, // 总页码
+        totalList: memberlist.total, // 记录总数量
+        callback: function (num) { //回调函数
+            window.location.href = "/member?pageNo=" + num + "&name=" + membername.replace(/\s*/g, "");
+        }
+    });
+
+    //删除会员信息
+    function deletemember(id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            $.ajax({
+                url: "/member/DeleteMember",
+                async: false,
+                type: 'post',
+                data: {
+                    id: id.replace(/\s*/g, "")
+                },
+                success: function (result) {
+                    if (result.code == "1") {
+                        layer.msg(result.content, {icon: 1});
+                        resh()
+                    } else {
+                        layer.msg(result.content, {icon: 2});
+                    }
+                }
+
+            });
+        });
+    }
+
+    //修改会员信息
+    function updatemember(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['800px', '450px']
+            , title: '修改会员'
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/member/GetMemberUpdate?id=' + id.replace(/\s*/g, "")
+        });
+    }
+
+    //会员充值
+    function recharge(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['800px', '450px']
+            , title: '会员充值'
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/member/GetRecharge?id=' + id.replace(/\s*/g, "")
+        });
+    }
+
+
+    //添加会员
+    function addmember() {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['800px', '450px']
+            , title: '添加会员'
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/member/GetMemberAdd'
+        });
+    }
+</script>
+</body>
+</html>

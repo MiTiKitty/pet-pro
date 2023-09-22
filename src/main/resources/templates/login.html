@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/login.css}">
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <script th:src="@{/css/jquery.min.js}"></script>
+    <script th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+
+</head>
+<body>
+<div id="wrapper" class="login-page">
+    <div id="login_form" class="form">
+        <form class="login-form" action="/loginin" method="post" onsubmit="return LoginFrom()">
+            <h2>萌萌宠物店管理登录</h2>
+            <input type="text" placeholder="账号必须为6-12为数字和字母" id="username" name="username" >
+            <input type="password" placeholder="密码必须为6-12为数字和字母" id="password" name="password">
+            <input type="submit" value="登录" style="background-color: green;"/>
+            <span th:text="${msg}" style="color: red;font-size: 18px"></span>
+        </form>
+    </div>
+</div>
+<script th:src="@{/css/jquery.min.js}"></script>
+<script type="text/javascript">
+    function LoginFrom() {
+        var username = $("#username").val().toString().replace(/\s*/g, "");
+        var password = $("#password").val().toString().trim().replace(/\s*/g, "");
+        if (username == "" || password == "") {
+            layer.msg('账号密码不能为空', {icon: 2});
+            return false;
+        } else {
+            if (username.length >= 6 && username.length <= 12 && password.length >= 6 && password.length <= 12) {
+                return true;
+            } else {
+                layer.msg('账号和密码必须为6-12为数字和字母', {icon: 2});
+                return false;
+            }
+        }
+    }
+
+
+</script>
+</body>
+</html>

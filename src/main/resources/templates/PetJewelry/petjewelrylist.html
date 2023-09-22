@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<style type="text/css">
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>宠物饰品管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/css/page.css}">
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+</head>
+
+<body class="layui-anim layui-anim-up">
+<div class="x-nav">
+    <a class="layui-btn layui-btn-primary layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+       href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:38px">ဂ</i></a>
+</div>
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" th:action="@{/petjewelry}">
+            <input type="text" name="petjewelryname" placeholder="饰品的名称:XXX" class="layui-input"
+                   id="petjewelryname" th:value="${petjewelryname}">
+            <input type="text" name="petjewelrytype" placeholder="饰品类型:绳子" class="layui-input"
+                   id="petjewelrytype" th:value="${petjewelrytype}">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i>
+            </button>
+        </form>
+    </div>
+    <xblock>
+        <button class="layui-btn" onclick="AddPetjewelry()" shiro:hasPermission="petjewelry:add"><i
+                class="layui-icon"></i>添加
+        </button>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th hidden="hidden">ID</th>
+            <th>饰品名称</th>
+            <th>饰品类型</th>
+            <th>饰品数量</th>
+            <th>饰品单价</th>
+            <th>库存操作</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="petjewelry : ${petjewelry.list}">
+            <td th:text="${petjewelry.id}" hidden="hidden"></td>
+            <td th:text="${petjewelry.petjewelryname}"></td>
+            <td th:text="${petjewelry.petjewelrytype}"></td>
+            <td th:text="${petjewelry.petjewelrynumber}"></td>
+            <td th:text="${petjewelry.petjewelryprice}"></td>
+            <td>
+                <button type="button" class="layui-btn" th:onclick="IncreaseStock([[${petjewelry.id}]])" shiro:hasPermission="petjewelry:increasestock">加库存</button>
+                <button type="button" class="layui-btn" th:onclick="ReduceStock([[${petjewelry.id}]])" shiro:hasPermission="petjewelry:reducestock">减库存</button>
+                <button type="button" class="layui-btn" th:onclick="Scrap([[${petjewelry.id}]])" shiro:hasPermission="petjewelry:scrap">报废库存</button>
+            </td>
+            <td class="td-manage">
+                <a title="修改" th:onclick="updatepetfood([[${petjewelry.id}]])" shiro:hasPermission="petjewelry:update">
+                    <i class="layui-icon">&#xe642;</i>
+                </a>
+                <a title="删除" th:onclick="deletepetfood([[${petjewelry.id}]])" shiro:hasPermission="petjewelry:delete">
+                    <i class="layui-icon">&#xe640;</i>
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(petjewelry.list)}">
+            <td colspan="9" style="color: red;font-size: 32px;">暂无数据</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="page">
+        <div id="page" class="page_div"></div>
+    </div>
+</div>
+<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+<script th:src="@{/js/pageMe.js}"></script>
+<script th:inline="javascript">
+    var petjewelry = [[${petjewelry}]];
+    var petjewelryname = $('#petjewelryname').val().toString().trim();
+    var petjewelrytype = $('#petjewelrytype').val().toString().trim();
+    //翻页
+    $("#page").paging({
+        pageNum: petjewelry.pageNum, // 当前页面
+        totalNum: petjewelry.pages, // 总页码
+        totalList: petjewelry.total, // 记录总数量
+        callback: function (num) { //回调函数
+            window.location.href = "/petjewelry?pageNo=" + num + "&petjewelryname=" + petjewelryname + "&petjewelrytype=" + petjewelrytype;
+        }
+    });
+
+    //删除饰品信息
+    function deletepetfood(id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            $.ajax({
+                url: "/petjewelry/DeletePetjewelry",
+                async: false,
+                type: 'post',
+                data: {
+                    id: id
+                },
+                success: function (result) {
+                    if (result.code == "1") {
+                        layer.msg(result.content, {icon: 1});
+                        resh()
+                    } else {
+                        layer.msg(result.content, {icon: 2});
+                    }
+                }
+
+            });
+        });
+    }
+
+    //修改饰品信息
+    function updatepetfood(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['1000px', '700px']
+            , title: '修改饰品' + '-' + id
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/petjewelry/GetUpdatePetjewelry?id=' + id
+        });
+    }
+
+
+    //补仓饰品
+    function IncreaseStock(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['700px', '500px']
+            , title: '添加饰品库存' + '-' + id
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/petjewelry/GetIncreaseStock?id=' + id
+        });
+    }
+
+
+    //减仓饰品
+    function ReduceStock(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['700px', '500px']
+            , title: '减少饰品库存' + '-' + id
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/petjewelry/GetReduceStock?id=' + id
+        });
+    }
+
+    //报废饰品
+    function Scrap(id) {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['700px', '500px']
+            , title: '报废饰品' + '-' + id
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/petjewelry/GetScrap?id=' + id
+        });
+    }
+
+    //添加饰品
+    function AddPetjewelry() {
+        layer.open({
+            type: 2 //Page层类型
+            , area: ['600px', '450px']
+            , title: '添加饰品'
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开启
+            , content: '/petjewelry/GetAddPetjewelry'
+        });
+    }
+
+
+</script>
+</body>
+</html>

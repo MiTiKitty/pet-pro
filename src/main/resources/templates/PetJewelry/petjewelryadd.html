@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加宠物饰品</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <script src=".." th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+</head>
+<body>
+<div class="x-body">
+    <form class="layui-form">
+
+        <div class="layui-form-item">
+            <label for="petjewelryname" class="layui-form-label">
+                <span class="x-red">*</span>饰品名称
+            </label>
+            <div class="layui-input-inline" style="width: 50%">
+                <input type="text" id="petjewelryname" name="petjewelryname" lay-verify="required"
+                       autocomplete="off" class="layui-input" placeholder="2-20个字符">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span id="VerificationJewelryName"></span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="petjewelrytype" class="layui-form-label">
+                <span class="x-red">*</span>饰品类型
+            </label>
+            <div>
+                <div class="layui-input-inline" style="width: 50%">
+                    <input type="text" id="petjewelrytype" name="petjewelrytype" lay-verify="required"
+                           autocomplete="off" class="layui-input" placeholder="2-20个字符">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="petjewelrynumber" class="layui-form-label">
+                <span class="x-red">*</span>饰品数量
+            </label>
+            <div class="layui-input-inline" style="width:50%">
+                <input type="text" id="petjewelrynumber" name="petjewelrynumber" lay-verify="required|foodnumber" placeholder="只能为正整数"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="petjewelryprice" class="layui-form-label">
+                <span class="x-red">*</span>饰品单价
+            </label>
+            <div class="layui-input-inline" style="width: 50%">
+                <input type="text" id="petjewelryprice" name="petjewelryprice" lay-verify="required|foodprice"
+                       autocomplete="off" class="layui-input" placeholder="正整数或者2位小数">
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-left: 30%">
+            <button class="layui-btn" lay-filter="add" lay-submit="" .>增加</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    layui.use(['form', 'layer'], function () {
+        var form = layui.form,
+            layer = layui.layer;
+        //自定义验证规则
+        form.verify({
+            foodnumber: [/^[1-9]+$/, '数量必须为正整数'],
+            foodprice: [/^([0-9]+|0)(\.(([0-9][0-9])|[0-9]{1,2})){0,1}$/, '单价必须为正整数或者2位小数'],
+            petjewelryname: function (value) {
+                if (value.length < 2) {
+                    return '饰品名称至少得2个字符';
+                }
+                if (value.length > 20) {
+                    return '饰品名称不得超过20个字符';
+                }
+            },
+            petjewelrytype:function (value) {
+                if (value.length < 2) {
+                    return '饰品类型至少得2个字符';
+                }
+                if (value.length > 20) {
+                    return '饰品类型不得超过20个字符';
+                }
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(add)', function (data) {
+            $.ajax({
+                url: "/petjewelry/AddPetjewelry",
+                type: "post",
+                anys: false,
+                data: {
+                    petjewelryname: data.field.petjewelryname.replace(/\s*/g, ""),
+                    petjewelrytype: data.field.petjewelrytype.replace(/\s*/g, ""),
+                    petjewelrynumber: data.field.petjewelrynumber.replace(/\s*/g, ""),
+                    petjewelryprice: data.field.petjewelryprice.replace(/\s*/g, ""),
+                }, success: function (result) {
+                    if (result.code == '1') {
+                        layer.msg(result.content, {icon: 1});
+                        x_admin_close();
+                    } else {
+                        layer.msg(result.content, {icon: 2});
+                        x_admin_close();
+                    }
+                }
+            })
+
+            return false;
+        });
+    })
+
+    //食品名称是否重复
+    $('#petjewelryname').blur(function () {
+        var petjewelryname = $('#petjewelryname').val();
+        if (petjewelryname == null || petjewelryname == '') {
+            $('#VerificationJewelryName').css('color', 'red').text("饰品名称不能为空");
+            $('#petjewelryname').val("");
+        } else {
+            if (petjewelryname.indexOf(" ") == -1) {
+                $.ajax({
+                    url: "/petjewelry/VerificationPetJewelryName",
+                    type: "post",
+                    anys: false,
+                    data: {
+                        jewelryname: petjewelryname.replace(/\s*/g, ""),
+                    }, success: function (result) {
+                        if (result.code == '1') {
+                            $('#VerificationJewelryName').css('color', 'green').text("可以使用");
+                            console.log(result)
+                        } else {
+                            console.log(result)
+                            $('#VerificationJewelryName').css('color', 'red').text("不能使用");
+                            $('#petjewelryname').val("");
+                        }
+                    }
+                })
+            } else {
+                $('#VerificationJewelryName').css('color', 'red').text("不能带有空格");
+                $('#petjewelryname').val("");
+            }
+        }
+
+    })
+
+
+</script>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>饰品-添加库存</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <script src=".." th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+</head>
+<body>
+<div class="x-body">
+    <form class="layui-form">
+
+
+        <div class="layui-form-item">
+            <label for="id" class="layui-form-label">
+                <span class="x-red">*</span>ID
+            </label>
+            <div class="layui-input-inline" style="width:50%">
+                <input type="text" id="id" name="id"
+                       autocomplete="off" class="layui-input" readonly="readonly" th:value="${petjewelry.id}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="petjewelryname" class="layui-form-label">
+                <span class="x-red">*</span>饰品名称
+            </label>
+            <div class="layui-input-inline" style="width: 50%">
+                <input type="text" id="petjewelryname" name="petjewelryname"
+                       autocomplete="off" class="layui-input" readonly="readonly"
+                       th:value="${petjewelry.petjewelryname}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="petjewelrytype" class="layui-form-label">
+                <span class="x-red">*</span>饰品类型
+            </label>
+            <div>
+                <div class="layui-input-inline" style="width: 50%">
+                    <input type="text" id="petjewelrytype" name="petjewelrytype"
+                           autocomplete="off" class="layui-input" readonly="readonly"
+                           th:value="${petjewelry.petjewelrytype}">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="petjewelrynumber" class="layui-form-label">
+                <span class="x-red">*</span>饰品数量
+            </label>
+            <div class="layui-input-inline" style="width:50%">
+                <input type="text" id="petjewelrynumber" name="petjewelrynumber"
+                       autocomplete="off" class="layui-input" readonly="readonly"
+                       th:value="${petjewelry.petjewelrynumber}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="petjewelryprice" class="layui-form-label">
+                <span class="x-red">*</span>饰品单价
+            </label>
+            <div class="layui-input-inline" style="width: 50%">
+                <input type="text" id="petjewelryprice" name="petjewelryprice"
+                       autocomplete="off" class="layui-input" readonly="readonly"
+                       th:value="${petjewelry.petjewelryprice}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="AddNumber" class="layui-form-label">
+                <span class="x-red">*</span>增加量
+            </label>
+            <div class="layui-input-inline" style="width:50%">
+                <input type="text" id="AddNumber" name="AddNumber" lay-verify="required|AddNumber"
+                       autocomplete="off" class="layui-input" placeholder="只能为正整数">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item" style="margin-left: 30%">
+            <button class="layui-btn" lay-filter="update" lay-submit="" .>增加库存</button>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    layui.use(['form', 'layer'], function () {
+        var form = layui.form,
+            layer = layui.layer;
+        //自定义验证规则
+        form.verify({
+            AddNumber: [/^[1-9]+$/, '数量必须为正整数'],
+        });
+
+
+        //监听提交
+        form.on('submit(update)', function (data) {
+            $.ajax({
+                url: "/petjewelry/IncreaseStock",
+                type: "post",
+                anys: false,
+                data: {
+                    IncreasNumber: data.field.AddNumber.replace(/\s*/g, ""),
+                    id: data.field.id.replace(/\s*/g, "")
+                }, success: function (result) {
+                    if (result.code == '1') {
+                        layer.msg(result.content, {icon: 1});
+                        x_admin_close();
+                    } else {
+                        layer.msg(result.content, {icon: 2});
+                        x_admin_close();
+                    }
+                }
+            })
+
+            return false;
+        });
+    })
+
+
+</script>
+</html>

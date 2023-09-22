@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-L-admin1.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" th:href="@{/css/font.css}">
+    <link rel="stylesheet" th:href="@{/css/xadmin.css}">
+    <link rel="stylesheet" th:href="@{/css/page.css}">
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script type="text/javascript" th:src="@{/lib/layui/layui.js}" charset="utf-8"></script>
+    <script type="text/javascript" th:src="@{/js/xadmin.js}"></script>
+</head>
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <blockquote class="layui-elem-quote">
+        <span style="font-size: 18px">欢迎您:</span>
+        <span style="font-size: 18px" th:text="${username}"></span>
+        -
+        <span style="font-size: 18px" th:text="${roleEntity.name}"></span>
+        <fieldset class="layui-elem-field" style="margin-top: 20px">
+            <legend>系统状态</legend>
+            <div class="layui-field-box">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body">
+                            <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim=""
+                                 lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                                <div carousel-item="">
+                                    <ul class="layui-row layui-col-space10 layui-this">
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>待处理订单</h6>
+                                                <p>
+                                                    <cite id="unprocessedoder"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a class="x-admin-backlog-body">
+                                                <h6>会员数</h6>
+                                                <p>
+                                                    <cite id="membernumber"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>饰品种类数</h6>
+                                                <p>
+                                                    <cite id="petjewelrymumber"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>食品种类数</h6>
+                                                <p>
+                                                    <cite id="petfoodmumber"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>正在寄养中</h6>
+                                                <p>
+                                                    <cite id="petfostermumber"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>今日销售</h6>
+                                                <p>
+                                                    <cite id="todaysales"></cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h6>提醒</h6>
+                                                <p>
+                                                    <cite id=""></cite></p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+</div>
+<div id="notice">
+<script>
+    $.ajax({
+        url: "/systemstate",
+        async: false,
+        type: 'get',
+        data: {},
+        success: function (result) {
+            $('#unprocessedoder').text(result.unprocessedoder);
+            $('#membernumber').text(result.membernumber);
+            $('#petfoodmumber').text(result.petfoodmumber);
+            $('#petfostermumber').text(result.petfostermumber);
+            $('#petjewelrymumber').text(result.petjewelrymumber);
+            $('#todaysales').text(result.todaysales);
+        }
+    });
+
+</script>
+</body>
+</html>
